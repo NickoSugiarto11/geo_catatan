@@ -1,9 +1,10 @@
-import 'package:flutter/gestures.dart';
+import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:latlong2/latlong.dart' as latlong;
 import 'package:geolocator/geolocator.dart';
 import 'package:geocoding/geocoding.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'catatan_model.dart';
 
 void main() {
@@ -30,9 +31,34 @@ class _MapScreenState extends State<MapScreen> {
   final List<CatatanModel> _savedNotes = [];
   final MapController _mapController = MapController();
 
-  // Fungsi untuk mendapatkan lokasi saat ini
+  @override
+  void initState() {
+    super.initState();
+    _loadData();
+  }
+
+  // 1. LOAD SAVE DATA
+  Future<void> _loadData() async {
+    SharedPreferences pref = await SharedPreferences.getInstance();
+    String? raw = pref.getString('notes');
+
+    if (raw != null) {
+      List list = jsonDecode(raw);
+      setState(() {
+        _savedNotes.clear();
+        _savedNotes.addAll(list.map((e) => CatatanModel.fromMap(e)));
+      });
+    }
+  }
+
+  // 2. SAVE DATA
+  Future<void> _saveData() async {
+    SharedPreferences pref = await SharedPreferences.getInstance();
+    await pref.setString('notes', jsonEncode(_savedNotes.map((e) => e.toMap()).toList()));
+  }
+
+  // Fitur Lokasi
   Future<void> _findMyLocation() async {
-    //Cek layanan izin GPS
     bool serviceEnabled = await Geolocator.isLocationServiceEnabled();
     if (!serviceEnabled) return;
 
@@ -43,20 +69,59 @@ class _MapScreenState extends State<MapScreen> {
     }
 
     Position position = await Geolocator.getCurrentPosition();
-
     _mapController.move(latlong.LatLng(position.latitude, position.longitude), 15.0);
   }
 
-  // Fungsi menangani long press pada peta
+  // LONG PRESS UNTUK MENAMBAH CATATAN
   void _handleLongPress(TapPosition _, latlong.LatLng point) async {
     List<Placemark> placemarks = await placemarkFromCoordinates(point.latitude, point.longitude);
 
     String address = placemarks.first.street ?? "Alamat tidak dikenali";
 
-    // Tampilkan dialog
+    // Tampilkan dialog memilih jenis
+    String? jenisDipilih = await showDialog(
+      context: context,
+      builder: (context) {
+        return SimpleDialog(
+          title: const Text("Pilih Jenis Catatan"),
+          children: [
+            SimpleDialogOption(onPressed: () => Navigator.pop(context, "Rumah"), child: const Text("Rumah")),
+            SimpleDialogOption(onPressed: () => Navigator.pop(context, "Toko"), child: const Text("Toko")),
+            SimpleDialogOption(onPressed: () => Navigator.pop(context, "Kantor"), child: const Text("Kantor")),
+          ],
+        );
+      },
+    );
+
+    if (jenisDipilih == null) return;
+
     setState(() {
-      _savedNotes.add(CatatanModel(position: point, note: "Catatan Baru", address: address));
+      _savedNotes.add(CatatanModel(position: point, note: "Catatan Baru", address: address, jenis: jenisDipilih));
     });
+
+    _saveData();
+  }
+
+  // ICON MARKER BERDASARKAN JENIS
+  Icon _getMarkerIcon(String jenis) {
+    switch (jenis) {
+      case "Rumah":
+        return const Icon(Icons.home, color: Colors.blue, size: 40);
+      case "Toko":
+        return const Icon(Icons.store, color: Colors.green, size: 40);
+      case "Kantor":
+        return const Icon(Icons.apartment, color: Colors.orange, size: 40);
+      default:
+        return const Icon(Icons.location_on, color: Colors.red, size: 40);
+    }
+  }
+
+  // HAPUS MARKER
+  void _hapusMarker(int index) {
+    setState(() {
+      _savedNotes.removeAt(index);
+    });
+    _saveData();
   }
 
   @override
@@ -68,15 +133,34 @@ class _MapScreenState extends State<MapScreen> {
         options: MapOptions(initialCenter: const latlong.LatLng(-6.2, 106.8), initialZoom: 13.0, onLongPress: _handleLongPress),
         children: [
           TileLayer(urlTemplate: 'https://tile.openstreetmap.org/{z}/{x}/{y}.png'),
+
+          // MARKER LAYER
           MarkerLayer(
-            markers: _savedNotes
-                .map(
-                  (n) => Marker(
-                    point: n.position,
-                    child: const Icon(Icons.location_on, color: Colors.red),
-                  ),
-                )
-                .toList(),
+            markers: List.generate(_savedNotes.length, (i) {
+              final n = _savedNotes[i];
+              return Marker(
+                point: n.position,
+                child: GestureDetector(
+                  onTap: () {
+                    showModalBottomSheet(
+                      context: context,
+                      builder: (context) => ListTile(
+                        title: Text(n.address),
+                        subtitle: Text("${n.jenis} • ${n.note}"),
+                        trailing: IconButton(
+                          icon: const Icon(Icons.delete, color: Colors.red),
+                          onPressed: () {
+                            _hapusMarker(i);
+                            Navigator.pop(context);
+                          },
+                        ),
+                      ),
+                    );
+                  },
+                  child: _getMarkerIcon(n.jenis),
+                ),
+              );
+            }),
           ),
         ],
       ),

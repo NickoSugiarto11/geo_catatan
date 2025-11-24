@@ -1,16 +1,24 @@
 # geo_catatan
 
-A new Flutter project.
+## Nicko Sugiarto/362458302119/2D/TRPL
 
-## Getting Started
+## Tujuan Pembelajaran
 
-This project is a starting point for a Flutter application.
+1. Mengimplementasikan flutter_map untuk menampilkan peta.
+2. Menggunakan geolocator untuk mendapatkan koordinat GPS pengguna.
+3. Menggunakan geocoding untuk mengubah koordinat menjadi alamat.
+4. Menangani interaksi pengguna (Gesture) pada peta.
 
-A few resources to get you started if this is your first Flutter project:
+## Langkah-Langkah
 
-- [Lab: Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
-- [Cookbook: Useful Flutter samples](https://docs.flutter.dev/cookbook)
+1. Menambahkan Dependency pada file pubspec.yaml
+   ![alt text](image.png)
+2. Membuat Model Data dengan nama catatan_model.dart
+   ![alt text](image.png)
 
-For help getting started with Flutter development, view the
-[online documentation](https://docs.flutter.dev/), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
+## Dokumentasi Hasil
+
+- Menampilkan dialog yang digunakan untuk memilih jenis catatan.
+  ![alt text](<WhatsApp Image 2025-11-24 at 18.32.11.jpeg>)
+- Menampilkan dialog dari bottom yang berisi icon untuk menghapus catatan.
+  ![alt text](<WhatsApp Image 2025-11-24 at 18.35.55.jpeg>)
