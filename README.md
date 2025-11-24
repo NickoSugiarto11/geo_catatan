@@ -12,13 +12,13 @@
 ## Langkah-Langkah
 
 1. Menambahkan Dependency pada file pubspec.yaml
-   ![alt text](image.png)
+   <img width="683" height="205" alt="Screenshot 2025-11-24 182901" src="https://github.com/user-attachments/assets/62353f04-c48e-46d1-bc9f-1587aff5da79" />
 2. Membuat Model Data dengan nama catatan_model.dart
-   ![alt text](image.png)
+   <img width="1814" height="383" alt="Screenshot 2025-11-24 183003" src="https://github.com/user-attachments/assets/0de8fe76-2ba4-42d9-bdca-754722c8f240" />
 
 ## Dokumentasi Hasil
 
 - Menampilkan dialog yang digunakan untuk memilih jenis catatan.
-  ![alt text](<WhatsApp Image 2025-11-24 at 18.32.11.jpeg>)
+  ![WhatsApp Image 2025-11-24 at 18 32 11](https://github.com/user-attachments/assets/7ecd5fd5-1650-4fbe-9e1f-b09015f207e4)
 - Menampilkan dialog dari bottom yang berisi icon untuk menghapus catatan.
-  ![alt text](<WhatsApp Image 2025-11-24 at 18.35.55.jpeg>)
+  ![WhatsApp Image 2025-11-24 at 18 35 55](https://github.com/user-attachments/assets/09a894d0-cf2f-4371-8588-60e2d136233f)
